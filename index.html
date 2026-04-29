@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Smart Money Intel — Institutional 13F Intelligence</title>
+
+<!-- SEO -->
+<meta name="description" content="A personal 13F intelligence platform analyzing institutional SEC filings through 7 proprietary signals to surface high-conviction investment opportunities.">
+<meta name="author" content="Kuo Shou Yuan">
+
+<!-- Open Graph (LinkedIn, Facebook, WhatsApp, Telegram) -->
+<meta property="og:title" content="Smart Money Intel — Institutional 13F Intelligence">
+<meta property="og:description" content="A personal 13F intelligence platform analyzing institutional SEC filings through 7 proprietary signals to surface high-conviction investment opportunities.">
+<meta property="og:url" content="https://nuggets20.github.io/institutional_tracker2/">
+<meta property="og:type" content="website">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Smart Money Intel — Institutional 13F Intelligence">
+<meta name="twitter:description" content="A personal 13F intelligence platform analyzing institutional SEC filings through 7 proprietary signals to surface high-conviction investment opportunities.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1544,7 +1559,7 @@
       <div class="loading-text">Loading Dashboard</div>
       <div class="loading-note">First load may take ~30s — waking up the server</div>
     </div>
-    <iframe class="modal-iframe" id="modalIframe" src="" onload="iframeLoaded()"></iframe>
+    <iframe class="modal-iframe" id="modalIframe" src=""></iframe>
   </div>
 </div>
 
@@ -1610,7 +1625,9 @@
     document.getElementById('modalTitle').textContent = name + ' Dashboard';
     document.getElementById('modalSubtitle').textContent = desc || '';
     document.getElementById('modalLoading').classList.remove('hidden');
-    document.getElementById('modalIframe').src = url;
+    const iframe = document.getElementById('modalIframe');
+    iframe.onload = iframeLoaded;
+    iframe.src = url;
     document.getElementById('dashModal').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
