@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Money Intel — Institutional 13F Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080b;
+    --surface: #0d0f14;
+    --surface2: #12141a;
+    --border: #1c1f28;
+    --border2: #252831;
+    --gold: #c9a84c;
+    --gold-dim: #6b5720;
+    --gold-glow: rgba(201,168,76,0.12);
+    --text: #ddd9d0;
+    --text-muted: #5a5d69;
+    --text-dim: #878a97;
+    --green: #2cc995;
+    --red: #e05252;
+    --blue: #4a90d9;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--gold-dim); color: var(--gold); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 10px 0;
+    position: relative;
+  }
+  .ticker-wrap::before, .ticker-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 80px;
+    z-index: 2;
+  }
+  .ticker-wrap::before { left: 0; background: linear-gradient(to right, var(--surface), transparent); }
+  .ticker-wrap::after  { right: 0; background: linear-gradient(to left, var(--surface), transparent); }
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    animation: ticker 40s linear infinite;
+    width: max-content;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .tick {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 28px;
+    border-right: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .tick-sym { color: var(--text-dim); font-weight: 500; letter-spacing: 0.05em; }
+  .tick-val { color: var(--text); }
+  .tick-chg.pos { color: var(--green); }
+  .tick-chg.neg { color: var(--red); }
+  .tick-signal {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .tick-signal.buy { background: rgba(44,201,149,0.12); color: var(--green); border: 1px solid rgba(44,201,149,0.25); }
+  .tick-signal.watch { background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(7,8,11,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--text-muted); }
+  .nav-links { display: flex; align-items: center; gap: 32px; }
+  .nav-links a {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-size: 12px;
+    padding: 8px 18px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 3px;
+    color: var(--gold) !important;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: var(--gold-glow); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+    opacity: 0.3;
+  }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+  .hero-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 9vw, 120px);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .hero-headline em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 540px;
+    line-height: 1.65;
+    position: relative;
+    margin-bottom: 44px;
+    font-weight: 300;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 500; }
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    position: relative;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    padding: 14px 28px;
+    background: var(--gold);
+    color: #07080b;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: #d4b55e; transform: translateY(-1px); }
+  .btn-secondary {
+    padding: 13px 28px;
+    border: 1px solid var(--border2);
+    color: var(--text-dim);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 72px;
+    position: relative;
+    flex-wrap: wrap;
+  }
+  .stat-item {}
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    line-height: 1;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .stat-num span { color: var(--gold); }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ── SECTION COMMON ── */
+  section { padding: 100px 48px; }
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(32px, 4vw, 50px);
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 520px;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 0 48px;
+  }
+
+  /* ── SIGNALS ── */
+  #signals { background: var(--surface); }
+  .signals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .signals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .signal-card {
+    background: var(--surface2);
+    padding: 28px 28px 24px;
+    transition: background 0.2s;
+    cursor: default;
+    position: relative;
+  }
+  .signal-card:hover { background: #161821; }
+  .signal-card:hover .signal-bar { width: 100%; }
+  .signal-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--gold);
+    width: 0;
+    transition: width 0.4s ease;
+  }
+  .signal-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .signal-icon {
+    width: 36px; height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 16px;
+  }
+  .signal-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+  .signal-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .signal-tag {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    margin-top: 60px;
+  }
+  .how-steps { display: flex; flex-direction: column; gap: 0; }
+  .how-step {
+    display: flex;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .how-step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--border2);
+    min-width: 52px;
+    transition: color 0.2s;
+  }
+  .how-step:hover .step-num { color: var(--gold); }
+  .step-content {}
+  .step-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .step-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .how-visual {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    position: sticky;
+    top: 120px;
+  }
+  .how-visual-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .flow-node-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .flow-node-label { font-size: 13px; color: var(--text-dim); }
+  .flow-node-label strong { color: var(--text); font-weight: 500; }
+  .flow-arrow {
+    text-align: center;
+    color: var(--border2);
+    margin: 4px 0;
+    font-size: 14px;
+  }
+  .flow-signals-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 8px 0;
+  }
+  .flow-sig {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .flow-sig-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+  .output-card {
+    margin-top: 8px;
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 5px;
+    padding: 14px 16px;
+  }
+  .output-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .output-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    font-size: 13px;
+  }
+  .output-row:last-child { border-bottom: none; }
+  .output-ticker { color: var(--text); font-weight: 500; }
+  .output-score { color: var(--gold); font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* ── CASE STUDY ── */
+  #case-study { background: var(--surface); }
+  .cs-header { margin-bottom: 60px; }
+  .cs-body {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .cs-timeline { display: flex; flex-direction: column; gap: 0; }
+  .cs-event {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 32px;
+    position: relative;
+  }
+  .cs-event:not(:last-child) .cs-line {
+    position: absolute;
+    left: 11px;
+    top: 24px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border2);
+  }
+  .cs-dot-wrap { flex-shrink: 0; padding-top: 2px; }
+  .cs-dot {
+    width: 23px; height: 23px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cs-dot-inner {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .cs-event.active .cs-dot { border-color: var(--gold); }
+  .cs-event.active .cs-dot-inner { background: var(--gold); }
+  .cs-event.result .cs-dot { border-color: var(--green); }
+  .cs-event.result .cs-dot-inner { background: var(--green); }
+  .cs-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .cs-event-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .cs-event-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .cs-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .cs-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .cs-pill.gold { background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+  .cs-pill.green { background: rgba(44,201,149,0.1); color: var(--green); border: 1px solid rgba(44,201,149,0.2); }
+  .cs-chart-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    position: sticky;
+    top: 120px;
+  }
+  .cs-chart-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cs-chart-ticker {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+  .cs-chart-ret {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .cs-chart-body { padding: 24px; }
+  .cs-chart-canvas { width: 100%; height: 180px; position: relative; }
+  .chart-svg { width: 100%; height: 100%; }
+  .cs-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+  }
+  .cs-metric {
+    background: var(--surface2);
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .cs-metric-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .cs-metric-val.green { color: var(--green); }
+  .cs-metric-val.gold { color: var(--gold); }
+  .cs-metric-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ── DASHBOARD SECTION ── */
+  #dashboard { text-align: center; }
+  .dash-header { margin-bottom: 48px; }
+  .dash-header .section-sub { margin: 0 auto; }
+  .dash-embed-placeholder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dash-placeholder-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .dash-placeholder-note {
+    font-size: 12px;
+    color: var(--border2);
+    max-width: 400px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 48px;
+  }
+  .dash-card {
+    background: var(--surface);
+    padding: 24px;
+    text-align: left;
+  }
+  .dash-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .dash-card-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .dash-card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── CONVICTION TABLE ── */
+  #conviction { background: var(--surface); }
+  .table-wrap {
+    margin-top: 48px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .conv-table { width: 100%; border-collapse: collapse; }
+  .conv-table th {
+    background: var(--surface2);
+    padding: 12px 20px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .conv-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .conv-table tr:last-child td { border-bottom: none; }
+  .conv-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-ticker { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--text); font-size: 14px; }
+  .td-sector { color: var(--text-muted); }
+  .score-bar-wrap { width: 120px; }
+  .score-bar-bg { height: 4px; background: var(--border); border-radius: 2px; margin-top: 6px; }
+  .score-bar-fill { height: 100%; border-radius: 2px; }
+  .score-num { font-family: 'DM Mono', monospace; font-size: 12px; margin-bottom: 4px; }
+  .signal-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+  .sig-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .sig-badge.green { background: rgba(44,201,149,0.1); color: var(--green); }
+  .sig-badge.gold { background: rgba(201,168,76,0.1); color: var(--gold); }
+  .sig-badge.blue { background: rgba(74,144,217,0.1); color: var(--blue); }
+  .td-change.pos { color: var(--green); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .td-change.neg { color: var(--red); font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 60px 48px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 32px;
+  }
+  .footer-left {}
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    max-width: 420px;
+    line-height: 1.6;
+  }
+  .footer-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a {
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: color 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--border2);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── DASHBOARD MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-header-left { display: flex; flex-direction: column; gap: 2px; }
+  .modal-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .modal-subtitle { font-size: 12px; color: var(--text-muted); }
+  .modal-actions { display: flex; gap: 12px; align-items: center; }
+  .modal-open-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 7px 16px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 3px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .modal-open-btn:hover { background: var(--gold-glow); }
+  .modal-close {
+    width: 32px; height: 32px;
+    border-radius: 3px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .modal-close:hover { border-color: var(--text-muted); color: var(--text); }
+  .modal-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .modal-iframe-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .modal-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .modal-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--bg);
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .modal-loading.hidden { opacity: 0; }
+  .loading-spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .loading-note {
+    font-size: 12px;
+    color: var(--border2);
+    letter-spacing: 0.04em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* signal cards clickable */
+  .signal-card { cursor: pointer; }
+  .signal-card.active { background: #161821; }
+  .signal-card.active .signal-bar { width: 100%; }
+  .signal-card.locked { opacity: 0.45; cursor: not-allowed; }
+  .signal-card.locked:hover { background: var(--surface2); }
+  .signal-card.locked .signal-bar { width: 0 !important; }
+  .signal-coming-soon {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: rgba(90,93,105,0.15);
+    color: var(--text-muted);
+    border: 1px solid var(--border2);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-up {
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.25s; }
+  .delay-3 { animation-delay: 0.4s; }
+  .delay-4 { animation-delay: 0.55s; }
+  .delay-5 { animation-delay: 0.7s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    section, .hero { padding-left: 24px; padding-right: 24px; }
+    .divider { margin: 0 24px; }
+    .how-grid { grid-template-columns: 1fr; gap: 48px; }
+    .cs-body { grid-template-columns: 1fr; }
+    .cs-chart-panel { position: static; }
+    .dash-grid { grid-template-columns: 1fr 1fr; }
+    footer { padding: 40px 24px; }
+    .footer-right { align-items: flex-start; }
+  }
+  @media (max-width: 600px) {
+    .dash-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 32px; }
+    .signals-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap" style="margin-top:0;">
+  <div class="ticker-track" id="ticker">
+    <!-- JS will double the content for seamless loop -->
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">Smart<span>Money</span>Intel</div>
+  <div class="nav-links">
+    <a href="#signals">Signals</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#case-study">Case Study</a>
+    <a href="#conviction">Top Picks</a>
+    <a href="https://github.com/nuggets20" target="_blank" class="nav-cta">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow animate-up">Institutional 13F Intelligence Platform</div>
+  <h1 class="hero-headline animate-up delay-1">
+    Track<br><em>Smart Money</em><br>Before It Moves
+  </h1>
+  <p class="hero-sub animate-up delay-2">
+    An institutional-grade platform analyzing <strong>SEC 13F filings</strong> across
+    <strong>7 proprietary signals</strong> to surface high-conviction investment
+    opportunities before they become public knowledge.
+  </p>
+  <div class="hero-actions animate-up delay-3">
+    <a href="#conviction" class="btn-primary">View Top Picks</a>
+    <a href="#case-study" class="btn-secondary">See Case Study</a>
+  </div>
+  <div class="hero-stats animate-up delay-4">
+    <div class="stat-item">
+      <div class="stat-num">500<span>+</span></div>
+      <div class="stat-label">Institutions Tracked</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span>7</span></div>
+      <div class="stat-label">Proprietary Signals</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">13<span>F</span></div>
+      <div class="stat-label">SEC Filing Source</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">Q<span>trly</span></div>
+      <div class="stat-label">Data Refresh</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── SIGNALS ── -->
+<section id="signals">
+  <div class="signals-header">
+    <div>
+      <div class="section-eyebrow">The Edge</div>
+      <h2 class="section-title">7 Proprietary Signals</h2>
+    </div>
+    <p class="section-sub" style="max-width:340px;">
+      Each signal targets a different dimension of institutional behavior. Combined, they form a composite conviction score.
+    </p>
+  </div>
+  <div style="margin-bottom:16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.06em;">
+    <span style="color:var(--green);">●</span> Live dashboard — click any signal to explore &nbsp;&nbsp;
+    <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">First load may take ~30s to wake up</span>
+  </div>
+  <div class="signals-grid">
+    <div class="signal-card"
+         data-url="https://nuggets20-sector-analysis-dashboard.hf.space"
+         data-name="Sector Analysis"
+         data-desc="Which sectors are institutions rotating into? Tracks quarter-over-quarter allocation shifts across 500+ funds.">
+      <div class="signal-num">01</div>
+      <div class="signal-icon" style="background:rgba(201,168,76,0.1);">🏭</div>
+      <div class="signal-name">Sector Analysis</div>
+      <div class="signal-desc">Identifies which sectors institutions are rotating into using quarter-over-quarter allocation shifts.</div>
+      <div class="signal-tag" style="background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2);">Macro</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="signal-card"
+         data-url="https://nuggets20-fund-clustering-dashboard.hf.space"
+         data-name="Fund Clustering"
+         data-desc="Groups funds by portfolio overlap using clustering algorithms to detect consensus positions and emerging themes.">
+      <div class="signal-num">02</div>
+      <div class="signal-icon" style="background:rgba(74,144,217,0.1);">🔗</div>
+      <div class="signal-name">Fund Clustering</div>
+      <div class="signal-desc">Groups funds by portfolio overlap to detect consensus positions and emerging investment themes.</div>
+      <div class="signal-tag" style="background:rgba(74,144,217,0.1);color:var(--blue);border:1px solid rgba(74,144,217,0.2);">Pattern</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="signal-card"
+         data-url="https://nuggets20-price-performance-dashboard.hf.space"
+         data-name="Price Performance"
+         data-desc="Validates signal alpha by correlating institutional accumulation with subsequent price returns across 6 phases of analysis.">
+      <div class="signal-num">03</div>
+      <div class="signal-icon" style="background:rgba(44,201,149,0.1);">📈</div>
+      <div class="signal-name">Price Performance</div>
+      <div class="signal-desc">Correlates institutional accumulation with subsequent price returns to validate signal alpha.</div>
+      <div class="signal-tag" style="background:rgba(44,201,149,0.1);color:var(--green);border:1px solid rgba(44,201,149,0.2);">Alpha</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="signal-card"
+         data-url="https://nuggets20-early-detection-dashboard.hf.space"
+         data-name="Early Detection"
+         data-desc="Surfaces stocks in early accumulation — before the market notices. Flags quiet institutional buying across tier 1 funds.">
+      <div class="signal-num">04</div>
+      <div class="signal-icon" style="background:rgba(201,168,76,0.1);">🔍</div>
+      <div class="signal-name">Early Detection</div>
+      <div class="signal-desc">Surfaces stocks in the early accumulation phase — before multiple funds pile in and move the price.</div>
+      <div class="signal-tag" style="background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2);">Edge</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="signal-card"
+         data-url="https://nuggets20-contrarian-plays-dashboard.hf.space"
+         data-name="Contrarian Plays"
+         data-desc="Identifies stocks experiencing heavy institutional selling that show technical or fundamental divergence — potential bounce candidates.">
+      <div class="signal-num">05</div>
+      <div class="signal-icon" style="background:rgba(224,82,82,0.1);">⚡</div>
+      <div class="signal-name">Contrarian Plays</div>
+      <div class="signal-desc">Identifies stocks experiencing heavy institutional selling that show technical or fundamental divergence.</div>
+      <div class="signal-tag" style="background:rgba(224,82,82,0.1);color:var(--red);border:1px solid rgba(224,82,82,0.2);">Contrarian</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="signal-card"
+         data-url="https://nuggets20-momentum-dashboard.hf.space"
+         data-name="Momentum"
+         data-desc="Detects stocks with accelerating institutional interest — funds growing QoQ, classified as strong, stable, or fading momentum.">
+      <div class="signal-num">06</div>
+      <div class="signal-icon" style="background:rgba(44,201,149,0.1);">🚀</div>
+      <div class="signal-name">Momentum</div>
+      <div class="signal-desc">Detects stocks with accelerating institutional interest across consecutive quarters.</div>
+      <div class="signal-tag" style="background:rgba(44,201,149,0.1);color:var(--green);border:1px solid rgba(44,201,149,0.2);">Momentum</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="signal-card"
+         data-url="https://nuggets20-risk-analysis-dashboard.hf.space"
+         data-name="Risk Analysis"
+         data-desc="Flags highly concentrated vs. diversified holdings and crowding risk to assess conviction quality and tail risk exposure.">
+      <div class="signal-num">07</div>
+      <div class="signal-icon" style="background:rgba(74,144,217,0.1);">🛡️</div>
+      <div class="signal-name">Risk Analysis</div>
+      <div class="signal-desc">Flags highly concentrated vs. diversified holdings to assess conviction quality and tail risk.</div>
+      <div class="signal-tag" style="background:rgba(74,144,217,0.1);color:var(--blue);border:1px solid rgba(74,144,217,0.2);">Risk</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live — Click to View</span>
+      </div>
+      <div class="signal-bar"></div>
+    </div>
+  </div>
+
+  <!-- Composite Signal — Master Dashboard -->
+  <div style="margin-top:32px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+    <div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Master Output — Composite Signal</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px);">Which stock should I be looking at right now?</div>
+      <div style="font-size:13px;color:var(--text-dim);max-width:520px;line-height:1.6;">Combines all 7 signals into a single conviction score with adjustable weights. The live leaderboard answers the question every investor asks.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.07em;text-transform:uppercase;">Live</span>
+      </div>
+      <button onclick="openModal('https://nuggets20-composite-signals-dashboard.hf.space','Composite Signal Dashboard','All 7 signals combined into a single conviction leaderboard with adjustable weights.')"
+              style="padding:12px 24px;background:var(--gold);color:#07080b;font-family:'Manrope',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;border-radius:3px;border:none;cursor:pointer;transition:all 0.2s;">
+        View Master Dashboard
+      </button>
+      <a href="https://huggingface.co/spaces/nuggets20/composite-signals-dashboard" target="_blank"
+         style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase;border:1px solid var(--border2);padding:12px 16px;border-radius:3px;transition:all 0.2s;">
+        Open Full Screen ↗
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how-it-works">
+  <div class="section-eyebrow">The Process</div>
+  <h2 class="section-title">From Filing to Conviction</h2>
+  <div class="how-grid">
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="step-title">Ingest SEC 13F Filings</div>
+          <div class="step-desc">Quarterly 13F filings from 500+ institutions are pulled directly from SEC EDGAR. Every position, change in shares, and new/exited holding is captured and normalized.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="step-title">Run 7 Signal Engines</div>
+          <div class="step-desc">Each signal engine processes the data independently — sector rotation, fund clustering, momentum acceleration, early accumulation detection, and more — producing per-stock scores.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="step-title">Composite Scoring</div>
+          <div class="step-desc">Signal scores are weighted and combined into a single Conviction Score. Stocks that rank across multiple signals simultaneously are flagged as highest-priority opportunities.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="step-title">Dashboard &amp; Review</div>
+          <div class="step-desc">Results surface in an interactive master dashboard. Each signal has its own view, and the composite output gives a ranked shortlist of the most compelling setups right now.</div>
+        </div>
+      </div>
+    </div>
+    <div class="how-visual">
+      <div class="how-visual-title">System Architecture</div>
+      <div class="flow-node">
+        <div class="flow-node-dot" style="background:var(--blue)"></div>
+        <div class="flow-node-label"><strong>SEC EDGAR</strong> — 13F quarterly filings</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node">
+        <div class="flow-node-dot" style="background:var(--text-muted)"></div>
+        <div class="flow-node-label"><strong>Data Pipeline</strong> — parse, normalize, delta</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:12px 16px;margin-bottom:8px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">7 Signal Engines</div>
+        <div class="flow-signals-row">
+          <div class="flow-sig"><div class="flow-sig-dot"></div>Sector Analysis</div>
+          <div class="flow-sig"><div class="flow-sig-dot"></div>Fund Clustering</div>
+          <div class="flow-sig"><div class="flow-sig-dot"></div>Price Perf.</div>
+          <div class="flow-sig"><div class="flow-sig-dot"></div>Early Detection</div>
+          <div class="flow-sig"><div class="flow-sig-dot"></div>Contrarian</div>
+          <div class="flow-sig"><div class="flow-sig-dot"></div>Momentum</div>
+          <div class="flow-sig" style="grid-column:span 2"><div class="flow-sig-dot"></div>Risk Analysis</div>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="output-card">
+        <div class="output-label">Conviction Output — Q4 2024</div>
+        <div class="output-row">
+          <span class="output-ticker">YOUR TOP PICK</span>
+          <span class="output-score">Score: 94 ▲</span>
+        </div>
+        <div class="output-row">
+          <span class="output-ticker">2ND CONVICTION</span>
+          <span class="output-score">Score: 88 ▲</span>
+        </div>
+        <div class="output-row">
+          <span class="output-ticker">3RD CONVICTION</span>
+          <span class="output-score">Score: 81 ▲</span>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;letter-spacing:0.05em;">
+        → Replace with your actual output
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── CASE STUDY ── -->
+<section id="case-study">
+  <div class="cs-header">
+    <div class="section-eyebrow">Case Study — Early Detection Signal</div>
+    <h2 class="section-title">NVDA: Identified Before The Move</h2>
+    <p class="section-sub">A live demonstration of how the Early Detection signal surfaced NVIDIA before institutional consensus — and before the market priced it in.</p>
+  </div>
+  <div class="cs-body">
+    <div class="cs-timeline">
+      <div class="cs-event">
+        <div class="cs-dot-wrap">
+          <div class="cs-dot"><div class="cs-dot-inner"></div></div>
+          <div class="cs-line"></div>
+        </div>
+        <div>
+          <div class="cs-date">Q2 2023 — Signal Triggered</div>
+          <div class="cs-event-title">Early Accumulation Detected</div>
+          <div class="cs-event-desc">The Early Detection engine flagged NVDA: a small number of Tier 1 funds quietly increasing position size with no consensus yet forming. Classic early-stage accumulation pattern.</div>
+          <div class="cs-pills">
+            <span class="cs-pill gold">Early accumulation</span>
+            <span class="cs-pill gold">Low fund count</span>
+          </div>
+        </div>
+      </div>
+      <div class="cs-event active">
+        <div class="cs-dot-wrap">
+          <div class="cs-dot"><div class="cs-dot-inner"></div></div>
+          <div class="cs-line"></div>
+        </div>
+        <div>
+          <div class="cs-date">Q3 2023 — Confirmation</div>
+          <div class="cs-event-title">Tier 1 Fund Carry + Momentum</div>
+          <div class="cs-event-desc">Two additional Tier 1 institutional funds entered positions. Momentum signal also triggered as quarter-over-quarter accumulation accelerated. Composite score reached 91/100.</div>
+          <div class="cs-pills">
+            <span class="cs-pill gold">Tier 1 fund carry</span>
+            <span class="cs-pill green">Momentum confirmed</span>
+            <span class="cs-pill gold">Score: 91</span>
+          </div>
+        </div>
+      </div>
+      <div class="cs-event active">
+        <div class="cs-dot-wrap">
+          <div class="cs-dot"><div class="cs-dot-inner"></div></div>
+          <div class="cs-line"></div>
+        </div>
+        <div>
+          <div class="cs-date">Q4 2023 — Consensus Forms</div>
+          <div class="cs-event-title">Fund Count Accelerates</div>
+          <div class="cs-event-desc">Broader institutional consensus begins forming. Fund count triples. By this point the signal already had 2 quarters of lead time.</div>
+          <div class="cs-pills">
+            <span class="cs-pill green">Consensus forming</span>
+          </div>
+        </div>
+      </div>
+      <div class="cs-event result">
+        <div class="cs-dot-wrap">
+          <div class="cs-dot"><div class="cs-dot-inner"></div></div>
+        </div>
+        <div>
+          <div class="cs-date">Result</div>
+          <div class="cs-event-title">Strong Outperformance</div>
+          <div class="cs-event-desc">Update this with your actual return data from signal trigger to measurement date. The signal gave meaningful lead time before the move was widely covered.</div>
+          <div class="cs-pills">
+            <span class="cs-pill green">+X% vs S&P +Y%</span>
+            <span class="cs-pill green">Z months</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cs-chart-panel">
+      <div class="cs-chart-header">
+        <div>
+          <div class="cs-chart-ticker">NVDA</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">NVIDIA Corporation</div>
+        </div>
+        <div>
+          <div class="cs-chart-ret">+XXX% ↑</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-align:right;font-family:'DM Mono',monospace;">from signal</div>
+        </div>
+      </div>
+      <div class="cs-chart-body">
+        <!-- SVG price chart - schematic/illustrative -->
+        <div class="cs-chart-canvas">
+          <svg class="chart-svg" viewBox="0 0 400 180" preserveAspectRatio="none">
+            <!-- Grid lines -->
+            <line x1="0" y1="45" x2="400" y2="45" stroke="#1c1f28" stroke-width="1"/>
+            <line x1="0" y1="90" x2="400" y2="90" stroke="#1c1f28" stroke-width="1"/>
+            <line x1="0" y1="135" x2="400" y2="135" stroke="#1c1f28" stroke-width="1"/>
+            <!-- Price area fill -->
+            <defs>
+              <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2cc995" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#2cc995" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Price area (illustrative NVDA-like move) -->
+            <path d="M0,150 L40,145 L80,140 L120,130 L160,118 L200,105 L220,90 L250,60 L280,40 L320,25 L360,15 L400,10 L400,180 L0,180 Z"
+                  fill="url(#priceGrad)"/>
+            <!-- Price line -->
+            <path d="M0,150 L40,145 L80,140 L120,130 L160,118 L200,105 L220,90 L250,60 L280,40 L320,25 L360,15 L400,10"
+                  fill="none" stroke="#2cc995" stroke-width="2" stroke-linejoin="round"/>
+            <!-- Signal trigger line -->
+            <line x1="120" y1="0" x2="120" y2="180" stroke="#c9a84c" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- Signal label -->
+            <rect x="124" y="8" width="58" height="18" rx="3" fill="rgba(201,168,76,0.12)"/>
+            <text x="153" y="20" fill="#c9a84c" font-family="monospace" font-size="10" text-anchor="middle">Signal ↑</text>
+            <!-- Confirmation line -->
+            <line x1="200" y1="0" x2="200" y2="180" stroke="#2cc995" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+            <!-- Dots at key points -->
+            <circle cx="120" cy="130" r="4" fill="#c9a84c"/>
+            <circle cx="200" cy="105" r="4" fill="#2cc995"/>
+            <circle cx="400" cy="10" r="4" fill="#2cc995"/>
+          </svg>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:8px;letter-spacing:0.04em;">
+          <span>Q1 2023</span><span>Q2</span><span>Q3</span><span>Q4</span><span>Q1 2024</span>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+            <div style="width:20px;height:1px;border-top:1px dashed var(--gold)"></div>
+            Early Detection Signal
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+            <div style="width:20px;height:1px;border-top:1px dashed var(--green)"></div>
+            Momentum Confirmation
+          </div>
+        </div>
+      </div>
+      <div class="cs-metrics">
+        <div class="cs-metric">
+          <div class="cs-metric-val green">+XXX%</div>
+          <div class="cs-metric-label">Return</div>
+        </div>
+        <div class="cs-metric">
+          <div class="cs-metric-val gold">91/100</div>
+          <div class="cs-metric-label">Signal Score</div>
+        </div>
+        <div class="cs-metric">
+          <div class="cs-metric-val" style="color:var(--text);">2 Qtrs</div>
+          <div class="cs-metric-label">Lead Time</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── CONVICTION TABLE ── -->
+<section id="conviction">
+  <div class="section-eyebrow">Composite Signal Output</div>
+  <h2 class="section-title">Highest Conviction Picks</h2>
+  <p class="section-sub">Stocks scoring across the most signals simultaneously — the highest-conviction opportunities from the latest quarterly 13F analysis.</p>
+  <div class="table-wrap">
+    <table class="conv-table">
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th>Sector</th>
+          <th>Conviction Score</th>
+          <th>Active Signals</th>
+          <th>Inst. Change</th>
+          <th>Price Chg (Q)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="window.open('https://finance.yahoo.com/quote/NVDA','_blank')" style="cursor:pointer;" title="View NVDA on Yahoo Finance">
+          <td><span class="td-ticker">NVDA</span></td>
+          <td class="td-sector">Technology</td>
+          <td>
+            <div class="score-num" style="color:var(--green)">94</div>
+            <div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:94%;background:var(--green)"></div></div></div>
+          </td>
+          <td>
+            <div class="signal-badges">
+              <span class="sig-badge green">Early Det.</span>
+              <span class="sig-badge gold">Momentum</span>
+              <span class="sig-badge blue">Sector</span>
+            </div>
+          </td>
+          <td class="td-change pos">+14.2%</td>
+          <td class="td-change pos">+18.4%</td>
+        </tr>
+        <tr onclick="window.open('https://finance.yahoo.com/quote/LLY','_blank')" style="cursor:pointer;" title="View LLY on Yahoo Finance">
+          <td><span class="td-ticker">LLY</span></td>
+          <td class="td-sector">Healthcare</td>
+          <td>
+            <div class="score-num" style="color:var(--gold)">88</div>
+            <div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:88%;background:var(--gold)"></div></div></div>
+          </td>
+          <td>
+            <div class="signal-badges">
+              <span class="sig-badge gold">Momentum</span>
+              <span class="sig-badge blue">Fund Cluster</span>
+            </div>
+          </td>
+          <td class="td-change pos">+9.7%</td>
+          <td class="td-change pos">+12.1%</td>
+        </tr>
+        <tr onclick="window.open('https://finance.yahoo.com/quote/JPM','_blank')" style="cursor:pointer;" title="View JPM on Yahoo Finance">
+          <td><span class="td-ticker">JPM</span></td>
+          <td class="td-sector">Financials</td>
+          <td>
+            <div class="score-num" style="color:var(--gold)">81</div>
+            <div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:81%;background:var(--gold)"></div></div></div>
+          </td>
+          <td>
+            <div class="signal-badges">
+              <span class="sig-badge blue">Sector</span>
+              <span class="sig-badge green">Early Det.</span>
+            </div>
+          </td>
+          <td class="td-change pos">+6.1%</td>
+          <td class="td-change pos">+8.3%</td>
+        </tr>
+        <tr onclick="window.open('https://finance.yahoo.com/quote/GE','_blank')" style="cursor:pointer;" title="View GE on Yahoo Finance">
+          <td><span class="td-ticker">GE</span></td>
+          <td class="td-sector">Industrials</td>
+          <td>
+            <div class="score-num" style="color:var(--text)">74</div>
+            <div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:74%;background:var(--text-muted)"></div></div></div>
+          </td>
+          <td>
+            <div class="signal-badges">
+              <span class="sig-badge gold">Contrarian</span>
+              <span class="sig-badge blue">Risk</span>
+            </div>
+          </td>
+          <td class="td-change neg">-3.2%</td>
+          <td class="td-change pos">+5.7%</td>
+        </tr>
+        <tr onclick="window.open('https://finance.yahoo.com/quote/XOM','_blank')" style="cursor:pointer;" title="View XOM on Yahoo Finance">
+          <td><span class="td-ticker">XOM</span></td>
+          <td class="td-sector">Energy</td>
+          <td>
+            <div class="score-num" style="color:var(--text)">69</div>
+            <div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:69%;background:var(--text-muted)"></div></div></div>
+          </td>
+          <td>
+            <div class="signal-badges">
+              <span class="sig-badge gold">Momentum</span>
+            </div>
+          </td>
+          <td class="td-change pos">+4.8%</td>
+          <td class="td-change pos">+6.2%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.05em;">
+    ↑ Click any row to view on Yahoo Finance &nbsp;·&nbsp; Scores reflect latest quarterly 13F composite output &nbsp;·&nbsp; Data as of Q1 2025
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-left">
+    <div class="footer-logo">Smart<span>Money</span>Intel</div>
+    <div class="footer-tagline">
+      Built an institutional-grade stock intelligence platform analyzing 13F data across 7 proprietary signals to identify high-conviction investment opportunities.
+    </div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-links">
+      <a href="https://www.linkedin.com/in/kuoshouyuan/" target="_blank">LinkedIn ↗</a>
+      <a href="https://github.com/nuggets20" target="_blank">GitHub ↗</a>
+      <a href="mailto:kuoshouyuan@gmail.com">Contact</a>
+    </div>
+    <div class="footer-copy">Updated quarterly · SEC 13F data source</div>
+  </div>
+</footer>
+
+<!-- ── DASHBOARD MODAL ── -->
+<div class="modal-overlay" id="dashModal">
+  <div class="modal-header">
+    <div class="modal-header-left">
+      <div class="modal-title" id="modalTitle">Early Detection Dashboard</div>
+      <div class="modal-subtitle" id="modalSubtitle">Institutional 13F Accumulation Intelligence</div>
+    </div>
+    <div class="modal-actions">
+      <span class="modal-badge" style="background:rgba(44,201,149,0.1);color:var(--green);border:1px solid rgba(44,201,149,0.2);">Live Data</span>
+      <button class="modal-open-btn" id="modalOpenBtn" onclick="openInNewTab()">Open Full Screen ↗</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+  </div>
+  <div class="modal-iframe-wrap">
+    <div class="modal-loading" id="modalLoading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Dashboard</div>
+      <div class="loading-note">First load may take ~30s — waking up the server</div>
+    </div>
+    <iframe class="modal-iframe" id="modalIframe" src="" onload="iframeLoaded()"></iframe>
+  </div>
+</div>
+
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+</style>
+
+<script>
+  const ticks = [
+    { sym:'NVDA', val:'108.50', chg:'+2.1%', pos:true,  sig:'BUY' },
+    { sym:'MSFT', val:'389.20', chg:'+0.8%', pos:true,  sig:'WATCH' },
+    { sym:'META', val:'520.40', chg:'+1.9%', pos:true,  sig:'BUY' },
+    { sym:'GOOGL', val:'158.70', chg:'-0.3%', pos:false, sig:'WATCH' },
+    { sym:'AMZN', val:'185.60', chg:'+1.4%', pos:true,  sig:'BUY' },
+    { sym:'AAPL', val:'207.30', chg:'-0.5%', pos:false, sig:'WATCH' },
+    { sym:'TSLA', val:'248.90', chg:'+3.2%', pos:true,  sig:'WATCH' },
+    { sym:'JPM',  val:'238.50', chg:'+0.6%', pos:true,  sig:'BUY' },
+    { sym:'LLY',  val:'795.10', chg:'-1.1%', pos:false, sig:'WATCH' },
+    { sym:'XOM',  val:'108.20', chg:'+1.7%', pos:true,  sig:'BUY' },
+    { sym:'GE',   val:'196.40', chg:'+0.9%', pos:true,  sig:'BUY' },
+    { sym:'AVGO', val:'218.30', chg:'+2.4%', pos:true,  sig:'BUY' },
+  ];
+
+  function buildTick(t) {
+    return `<div class="tick">
+      <span class="tick-sym">${t.sym}</span>
+      <span class="tick-val">${t.val}</span>
+      <span class="tick-chg ${t.pos?'pos':'neg'}">${t.chg}</span>
+      <span class="tick-signal ${t.sig==='BUY'?'buy':'watch'}">${t.sig}</span>
+    </div>`;
+  }
+
+  const el = document.getElementById('ticker');
+  const html = ticks.map(buildTick).join('');
+  el.innerHTML = html + html; // doubled for seamless loop
+
+  // Intersection observer for scroll animations
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.signal-card:not(.locked)').forEach(card => {
+    card.addEventListener('click', () => {
+      const url  = card.dataset.url;
+      const name = card.dataset.name;
+      const desc = card.dataset.desc;
+      openModal(url, name, desc);
+    });
+  });
+
+  let currentUrl = '';
+
+  function openModal(url, name, desc) {
+    currentUrl = url;
+    document.getElementById('modalTitle').textContent = name + ' Dashboard';
+    document.getElementById('modalSubtitle').textContent = desc || '';
+    document.getElementById('modalLoading').classList.remove('hidden');
+    document.getElementById('modalIframe').src = url;
+    document.getElementById('dashModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('dashModal').classList.remove('open');
+    document.getElementById('modalIframe').src = '';
+    document.body.style.overflow = '';
+  }
+
+  function iframeLoaded() {
+    document.getElementById('modalLoading').classList.add('hidden');
+  }
+
+  function openInNewTab() {
+    if (currentUrl) window.open(currentUrl, '_blank');
+  }
+
+  // Close on overlay click (outside modal header)
+  document.getElementById('dashModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Scroll animations
+  document.querySelectorAll('.signal-card, .how-step, .cs-event, .dash-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    io.observe(el);
+  });
+
+  // Stagger signal cards
+  document.querySelectorAll('.signal-card').forEach((el, i) => {
+    el.style.transitionDelay = `${i * 0.07}s`;
+  });
+  document.querySelectorAll('.how-step').forEach((el, i) => {
+    el.style.transitionDelay = `${i * 0.1}s`;
+  });
+  document.querySelectorAll('.cs-event').forEach((el, i) => {
+    el.style.transitionDelay = `${i * 0.12}s`;
+  });
+</script>
+</body>
+</html>
